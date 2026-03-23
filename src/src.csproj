@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="HackArena3\Proto\" />
+  </ItemGroup>
+
 </Project>
