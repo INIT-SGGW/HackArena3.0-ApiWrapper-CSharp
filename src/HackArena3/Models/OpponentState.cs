@@ -2,4 +2,9 @@
 
 namespace src.HackArena3.Models;
 
-public record class OpponentState(int CarId, Vec3 Position, Quaternion Orientation, GhostModeState? GhostMode);
+public record class OpponentState(
+    int CarId,
+    Vec3 Position,
+    Quaternion Orientation,
+    GhostModeState GhostMode
+);

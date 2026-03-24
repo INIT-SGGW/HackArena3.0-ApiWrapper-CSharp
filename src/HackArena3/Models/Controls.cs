@@ -7,6 +7,6 @@ public record Controls(
     float Brake,
     float Steering,
     GearShift GearShift = GearShift.None,
-    float BreakBalancer = 0.5f,
+    float BrakeBalancer = 0.5f,
     float DifferentialLock = 0.0f
 );

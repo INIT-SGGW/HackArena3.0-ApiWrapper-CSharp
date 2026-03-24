@@ -2,4 +2,9 @@
 
 namespace src.HackArena3.Models;
 
-public record PitstopLayout(ImmutableArray<CenterlinePoint> Enter, ImmutableArray<CenterlinePoint> Fix, ImmutableArray<CenterlinePoint> Exit, float LengthM);
+public record PitstopLayout(
+    ImmutableArray<CenterlinePoint> Enter,
+    ImmutableArray<CenterlinePoint> Fix,
+    ImmutableArray<CenterlinePoint> Exit,
+    float LengthM
+);

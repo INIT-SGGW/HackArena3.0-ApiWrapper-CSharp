@@ -1,4 +1,5 @@
 ﻿using src.HackArena3.Enums;
+using src.HackArena3.Flags;
 
 namespace src.HackArena3.Models;
 
@@ -7,16 +8,13 @@ public record CarState(
     Vec3 Position,
     Quaternion Orientation,
     float SpeedMps,
-    int GearRaw,
     DriveGear Gear,
     float EngineRpm,
     int LastAppliedClientSeq,
-    int PitstopZoneFlags,
+    PitstopZoneFlag PitstopZoneFlags,
     int WheelsInPitstop,
     GhostModeState GhostMode,
-    int TireTypeRaw,
     TireType TireType,
-    int NextPitTireTypeRaw,
     TireType NextPitTireType,
     TireWearPerWheel TireWear,
     TireTemperaturePerWheel TireTemperatureCelsius,
@@ -24,7 +22,7 @@ public record CarState(
     bool PitRequestActive,
     int PitEmergencyLockRemainingMs,
     int LastPitTimeMs,
-    int LastPitSourceRaw
+    int LastPitSource
 ){
     public float SpeedKmh => SpeedMps * 3.6f;
 }

@@ -7,6 +7,6 @@ internal class Bot : IBot
 {
     public void OnTick(RaceSnapshot snapshot, BotContext ctx)
     {
-        throw new NotImplementedException();
+        ctx.SetControls(0.25f, 0, 0);
     }
 }
