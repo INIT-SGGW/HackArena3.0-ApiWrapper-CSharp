@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+	<PackageId>hackarena3-apiwrapper-csharp</PackageId>
+	<Version>0.1.0</Version>
+	<Authors>Krzysztof Borowski</Authors>
+	<Company>INIT Students Association</Company>
+	<RepositoryUrl>https://github.com/INIT-SGGW/HackArena3.0-ApiWrapper-CSharp</RepositoryUrl>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
