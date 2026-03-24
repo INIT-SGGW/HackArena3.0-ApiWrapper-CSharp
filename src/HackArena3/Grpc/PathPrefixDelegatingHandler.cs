@@ -10,7 +10,7 @@ namespace src.HackArena3.Grpc;
 /// DelegatingHandler, który dodaje stały prefiks do ścieżki każdego wychodzącego żądania HTTP.
 /// Niezbędny do pracy z proxy (np. Envoy), które routują wywołania gRPC na podstawie ścieżki URL.
 /// </summary>
-public class PathPrefixDelegatingHandler : DelegatingHandler
+internal class PathPrefixDelegatingHandler : DelegatingHandler
 {
     private readonly string _prefix;
 

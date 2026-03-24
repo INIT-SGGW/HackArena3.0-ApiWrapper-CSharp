@@ -8,7 +8,7 @@ using ProtoRace = HA3.Proto.Race.V1;
 
 namespace src.HackArena3.Runtime;
 
-public class GameLoop
+internal class GameLoop
 {
     private readonly IBot _bot;
     private readonly DiscoveredSandbox _sandbox;

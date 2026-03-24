@@ -4,7 +4,7 @@ using src.HackArena3.Models;
 
 namespace Hackarena3.Wrapper.Configuration;
 
-public static class ConfigLoader
+internal static class ConfigLoader
 {
     // Definicje kluczy zmiennych środowiskowych, aby uniknąć "magicznych stringów".
     private const string EnvApiUrl = "HA3_WRAPPER_API_URL";

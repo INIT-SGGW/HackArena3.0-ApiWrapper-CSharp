@@ -2,7 +2,7 @@
 
 namespace src.HackArena3.Auth;
 
-public static class AuthBinaryResolver
+internal static class AuthBinaryResolver
 {
     private const string EnvHaAuthBin = "HA3_WRAPPER_HA_AUTH_BIN";
     private const string BinaryName = "ha-auth";

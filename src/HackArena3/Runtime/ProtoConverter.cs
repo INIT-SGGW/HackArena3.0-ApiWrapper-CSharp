@@ -5,7 +5,7 @@ using ProtoRace = HA3.Proto.Race.V1;
 
 namespace src.HackArena3.Runtime;
 
-public static class ProtoConverter
+internal static class ProtoConverter
 {
     public static RaceSnapshot ToRaceSnapshot(ProtoRace.ParticipantSnapshot proto)
     {

@@ -10,7 +10,7 @@ using src.HackArena3.Models;
 
 namespace src.HackArena3.Services;
 
-public class SandboxDiscoverer
+internal class SandboxDiscoverer
 {
     private const string ConnectProtocolVersion = "1";
     private const double ConnectValidateTimeoutSeconds = 2.0;
@@ -33,8 +33,6 @@ public class SandboxDiscoverer
         using var brokerChannel = GrpcChannelFactory.CreateBrokerChannel(_config.ApiAddr);
         var brokerClient = new BrokerService.BrokerServiceClient(brokerChannel);
         var backends = await FetchTeamBackendsAsync(brokerClient);
-
-        Console.WriteLine($"FOUND {backends.Count}");
 
         if (backends.Count == 0)
         {

@@ -7,7 +7,7 @@ using Grpc.Net.Client;
 
 namespace src.HackArena3.Grpc;
 
-public static class GrpcChannelFactory
+internal static class GrpcChannelFactory
 {
     /// <summary>
     /// Tworzy kanał gRPC skonfigurowany do komunikacji z usługą Broker,

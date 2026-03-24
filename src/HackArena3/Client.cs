@@ -10,8 +10,56 @@ namespace src.HackArena3;
 
 public static class Client
 {
-    public static async Task<int> RunBot(IBot bot, RuntimeConfig config)
+    private static RuntimeConfig? GetRuntimeConfig(string[] args)
     {
+        try
+        {
+            string? cliSandboxId = null;
+            Parser.Default.ParseArguments<CommandLineOptions>(args)
+                .WithParsed(options =>
+                {
+                    if (!string.IsNullOrWhiteSpace(options.SandboxId))
+                    {
+                        cliSandboxId = options.SandboxId.Trim();
+                    }
+                    else if (options.SandboxId != null)
+                    {
+                        throw new ConfigException("Empty value for --sandbox_id.");
+                    }
+                });
+
+            var runtimeConfig = ConfigLoader.LoadConfigurationFromEnvironment();
+
+            if (cliSandboxId != null)
+            {
+                runtimeConfig = runtimeConfig with { SandboxId = cliSandboxId };
+            }
+
+            return runtimeConfig;
+        }
+        catch (ConfigException ex)
+        {
+            Console.Error.WriteLine($"[ha3-wrapper] {ex.Message}");
+            return null;
+        }
+        catch (AuthException ex) // Dodajemy obsługę błędów autoryzacji
+        {
+            Console.Error.WriteLine($"[ha3-wrapper] {ex.Message}");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[ha3-wrapper] Unexpected error: {ex.Message}");
+            return null;
+        }
+    }
+
+    public static async Task<int> RunBot(IBot bot, string[] args)
+    {
+        var config = GetRuntimeConfig(args);
+
+        if (config == null) return 1;
+
         Console.WriteLine("[ha3-wrapper] Bot starting with configuration:");
         Console.WriteLine($"  API Address: {config.ApiAddr}");
         Console.WriteLine($"  Auth Binary: {(config.HaAuthBin ?? "Not set, will search")}");

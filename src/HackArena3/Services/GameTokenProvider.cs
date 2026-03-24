@@ -10,7 +10,7 @@ namespace src.HackArena3.Services;
 /// Odpowiedzialny za pozyskiwanie i odświeżanie tokenów gry (GameToken) z API.
 /// Implementuje IAsyncDisposable do poprawnego zarządzania kanałem gRPC.
 /// </summary>
-public sealed class GameTokenProvider : IAsyncDisposable
+internal sealed class GameTokenProvider : IAsyncDisposable
 {
     private const int RpcTimeoutSeconds = 10;
     private readonly string _memberJwt;

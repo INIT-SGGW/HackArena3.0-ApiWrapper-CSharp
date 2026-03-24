@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-public class MemberJwtProvider
+internal class MemberJwtProvider
 {
     private readonly string _haAuthBinaryPath;
 
