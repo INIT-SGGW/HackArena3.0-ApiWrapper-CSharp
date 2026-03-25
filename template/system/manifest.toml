@@ -1,1 +1,19 @@
-﻿
+﻿schema = 1
+
+[wrapper]
+language = "csharp"
+template_version = "0.0.0"
+
+[runtime]
+engine = "dotnet"
+version = "9.0.310"
+
+[run]
+entrypoint = ["./template.exe"]
+source_dir = "user/src"
+
+[submit]
+include = [
+	"user/src",
+]
+exclude = []
