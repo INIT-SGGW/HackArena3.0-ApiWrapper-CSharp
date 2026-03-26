@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "template": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "HA3_WRAPPER_API_URL": "https://ha3-api.dev.hackarena.pl",
+        "HA_AUTH_PROFILE": "preprod"
+      }
+    }
+  }
+}

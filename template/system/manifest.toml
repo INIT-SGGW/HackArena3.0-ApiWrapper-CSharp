@@ -6,14 +6,21 @@ template_version = "0.0.0"
 
 [runtime]
 engine = "dotnet"
-version = "9.0.310"
+version = "8.0"
 
 [run]
-entrypoint = ["./template.exe"]
+entrypoint = ["dotnet", "run", "--project", "Bot.csproj"]
 source_dir = "user/src"
 
 [submit]
 include = [
 	"user/src",
+	"Bot.csproj"
 ]
-exclude = []
+exclude = [
+	"**/.vs/**",
+	"**/bin/**",
+	"**/obj/**",
+	"**/Properties/**",
+	"**/Bot.sln/**"
+]
