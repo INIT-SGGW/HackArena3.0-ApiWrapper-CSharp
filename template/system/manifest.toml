@@ -22,5 +22,5 @@ exclude = [
 	"**/bin/**",
 	"**/obj/**",
 	"**/Properties/**",
-	"**/Bot.sln/**"
-]
+	"**/Bot.sln"
+}
