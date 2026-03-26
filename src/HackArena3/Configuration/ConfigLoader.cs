@@ -33,7 +33,7 @@ internal static class ConfigLoader
 
         return new RuntimeConfig
         {
-            ApiAddr = apiUrl.Trim(),
+            ApiAddr = apiUrl!.Trim(),
             HaAuthBin = string.IsNullOrWhiteSpace(haAuthBin) ? null : haAuthBin.Trim(),
             SandboxId = null
         };
