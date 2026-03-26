@@ -1,9 +1,6 @@
 ﻿namespace src.HackArena3.Models;
 
-/// <summary>
-/// Reprezentuje pojedynczy, aktywny sandbox odkryty na backendzie.
-/// </summary>
-public record DiscoveredSandbox
+internal record DiscoveredSandbox
 {
     public required string SandboxId { get; init; }
     public required string SandboxName { get; init; }

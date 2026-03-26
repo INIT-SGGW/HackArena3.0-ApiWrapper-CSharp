@@ -1,8 +1,6 @@
 ﻿using CommandLine;
 using Hackarena3.Wrapper.Configuration;
-using src.HackArena3.Auth;
 using src.HackArena3.Interfaces;
-using src.HackArena3.Models;
 using src.HackArena3.Runtime;
 using src.HackArena3.Services;
 
@@ -10,102 +8,42 @@ namespace src.HackArena3;
 
 public static class Client
 {
-    private static RuntimeConfig? GetRuntimeConfig(string[] args)
+    public static async Task<int> RunBot(IBot bot, string[] args)
     {
         try
         {
-            string? cliSandboxId = null;
-            Parser.Default.ParseArguments<CommandLineOptions>(args)
-                .WithParsed(options =>
+            var orchestrator = new RuntimeOrchestrator(bot);
+
+            using var cts = new CancellationTokenSource();
+            Console.CancelKeyPress += (_, e) => { cts.Cancel(); e.Cancel = true; };
+
+            await Parser.Default.ParseArguments<CommandLineOptions>(args)
+                .WithParsedAsync(async options =>
                 {
-                    if (!string.IsNullOrWhiteSpace(options.SandboxId))
+                    if (options.Official)
                     {
-                        cliSandboxId = options.SandboxId.Trim();
+                        var officialConfig = ConfigLoader.LoadOfficialConfiguration();
+                        await orchestrator.RunOfficialModeAsync(officialConfig, cts.Token);
                     }
-                    else if (options.SandboxId != null)
+                    else
                     {
-                        throw new ConfigException("Empty value for --sandbox_id.");
+                        var runtimeConfig = ConfigLoader.LoadConfigurationFromEnvironment();
+                        if (options.SandboxId != null)
+                        {
+                            runtimeConfig = runtimeConfig with { SandboxId = options.SandboxId };
+                        }
+                        await orchestrator.RunSandboxModeAsync(runtimeConfig, cts.Token);
                     }
                 });
 
-            var runtimeConfig = ConfigLoader.LoadConfigurationFromEnvironment();
-
-            if (cliSandboxId != null)
-            {
-                runtimeConfig = runtimeConfig with { SandboxId = cliSandboxId };
-            }
-
-            return runtimeConfig;
-        }
-        catch (ConfigException ex)
-        {
-            Console.Error.WriteLine($"[ha3-wrapper] {ex.Message}");
-            return null;
-        }
-        catch (AuthException ex) // Dodajemy obsługę błędów autoryzacji
-        {
-            Console.Error.WriteLine($"[ha3-wrapper] {ex.Message}");
-            return null;
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"[ha3-wrapper] Unexpected error: {ex.Message}");
-            return null;
-        }
-    }
-
-    public static async Task<int> RunBot(IBot bot, string[] args)
-    {
-        var config = GetRuntimeConfig(args);
-
-        if (config == null) return 1;
-
-        Console.WriteLine("[ha3-wrapper] Bot starting with configuration:");
-        Console.WriteLine($"  API Address: {config.ApiAddr}");
-        Console.WriteLine($"  Auth Binary: {(config.HaAuthBin ?? "Not set, will search")}");
-        Console.WriteLine($"  Sandbox ID:  {(config.SandboxId ?? "Not set, will prompt")}");
-
-        GameTokenProvider? tokenProvider = null;
-        try
-        {
-            var jwtProvider = new MemberJwtProvider(config.HaAuthBin);
-            Console.WriteLine("[ha3-wrapper] Fetching member JWT...");
-            var memberJwt = await jwtProvider.FetchMemberJwtAsync();
-            Console.WriteLine("[ha3-wrapper] Successfully fetched member JWT.");
-
-            // Krok 2: Odkryj i wybierz sandbox
-            var discoverer = new SandboxDiscoverer(config, memberJwt);
-            var selectedSandbox = await discoverer.DiscoverAndChooseSandboxAsync();
-            Console.WriteLine($"[ha3-wrapper] Selected sandbox: {selectedSandbox.SandboxName} ({selectedSandbox.SandboxId})");
-
-            // Krok 2: Utwórz dostawcę tokenu gry i pobierz pierwszy token
-            tokenProvider = new GameTokenProvider(config.ApiAddr, memberJwt);
-            Console.WriteLine("[ha3-wrapper] Fetching initial game token...");
-            await tokenProvider.RefreshAsync();
-            Console.WriteLine("[ha3-wrapper] Successfully fetched initial game token.");
-            // Console.WriteLine($"  Game Token: {tokenProvider.CurrentToken?.Token.Substring(0, 15)}...");
-
-            var gameLoop = new GameLoop(bot, selectedSandbox, tokenProvider);
-
-            using var cts = new CancellationTokenSource();
-            Console.CancelKeyPress += (sender, e) =>
-            {
-                Console.WriteLine("\n[ha3-wrapper] Cancellation requested...");
-                cts.Cancel();
-                e.Cancel = true; // Zapobiegaj natychmiastowemu zamknięciu aplikacji
-            };
-
-            await gameLoop.RunAsync(cts.Token);
-
-            Console.WriteLine("[ha3-wrapper] Game loop finished.");
             return 0;
         }
         catch (OperationCanceledException)
         {
             Console.WriteLine("\n[ha3-wrapper] Bot execution cancelled by user.");
-            return 130; // Kod wyjścia dla przerwania przez użytkownika
+            return 130;
         }
-        catch (GameTokenException ex) // Dodajemy obsługę błędów tokenu gry
+        catch (GameTokenException ex)
         {
             Console.Error.WriteLine($"[ha3-wrapper] {ex.Message}");
             return 1;
@@ -114,14 +52,6 @@ public static class Client
         {
             Console.Error.WriteLine($"[ha3-wrapper] Runtime error: {ex.Message}");
             return 1;
-        }
-        finally
-        {
-            // `await using` nie jest tutaj dostępne, więc robimy to ręcznie
-            if (tokenProvider != null)
-            {
-                await tokenProvider.DisposeAsync();
-            }
         }
     }
 }

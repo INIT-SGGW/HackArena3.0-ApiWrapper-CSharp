@@ -25,11 +25,10 @@ internal class SandboxDiscoverer
         _memberJwt = memberJwt;
     }
 
-    public async Task<DiscoveredSandbox> DiscoverAndChooseSandboxAsync()
+    public async Task<DiscoveredSandbox> DiscoverAndChooseSandboxAsync(CancellationToken cancellationToken = default)
     {
         Console.Error.WriteLine("[ha3-wrapper] Fetching team backends via BrokerService...");
 
-        // Krok 1: Pobierz listę backendów z Brokera
         using var brokerChannel = GrpcChannelFactory.CreateBrokerChannel(_config.ApiAddr);
         var brokerClient = new BrokerService.BrokerServiceClient(brokerChannel);
         var backends = await FetchTeamBackendsAsync(brokerClient);
@@ -39,7 +38,6 @@ internal class SandboxDiscoverer
             throw new SandboxDiscoveryException("Broker returned no team backends.");
         }
 
-        // Krok 2 i 3: Sprawdź backendy i pobierz z nich sandboxy
         var discoveredSandboxes = new List<DiscoveredSandbox>();
         foreach (var backendInfo in backends)
         {
@@ -73,7 +71,6 @@ internal class SandboxDiscoverer
             throw new SandboxDiscoveryException("No active sandboxes found in team backends.");
         }
 
-        // Krok 4: Wybierz sandbox
         return ChooseSandbox(discoveredSandboxes, _config.SandboxId);
     }
 
@@ -121,7 +118,6 @@ internal class SandboxDiscoverer
 
     private async Task<bool> ValidateBackendConnectionAsync(BackendTarget backend)
     {
-        // Backendy są na lokalnych maszynach, więc używamy niezabezpieczonego kanału (HTTP)
         using var channel = GrpcChannelFactory.CreateInsecureBackendChannel(backend.GrpcTarget);
         var client = new ConnectService.ConnectServiceClient(channel);
         var nonce = ByteString.CopyFrom(RandomNumberGenerator.GetBytes(16));

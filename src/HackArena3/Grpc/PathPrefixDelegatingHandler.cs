@@ -6,10 +6,6 @@ using System.Threading.Tasks;
 
 namespace src.HackArena3.Grpc;
 
-/// <summary>
-/// DelegatingHandler, który dodaje stały prefiks do ścieżki każdego wychodzącego żądania HTTP.
-/// Niezbędny do pracy z proxy (np. Envoy), które routują wywołania gRPC na podstawie ścieżki URL.
-/// </summary>
 internal class PathPrefixDelegatingHandler : DelegatingHandler
 {
     private readonly string _prefix;
@@ -17,7 +13,6 @@ internal class PathPrefixDelegatingHandler : DelegatingHandler
     public PathPrefixDelegatingHandler(string prefix, HttpMessageHandler innerHandler)
         : base(innerHandler)
     {
-        // Upewnij się, że prefiks zaczyna się od '/' i nie kończy się na '/'
         _prefix = "/" + prefix.Trim('/');
     }
 
@@ -27,7 +22,6 @@ internal class PathPrefixDelegatingHandler : DelegatingHandler
         {
             var originalPath = request.RequestUri.AbsolutePath;
 
-            // Budujemy nowy URI z dodanym prefiksem
             var newUri = new UriBuilder(request.RequestUri)
             {
                 Path = _prefix + originalPath

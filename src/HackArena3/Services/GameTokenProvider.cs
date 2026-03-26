@@ -5,11 +5,6 @@ using src.HackArena3.Grpc;
 using src.HackArena3.Models;
 
 namespace src.HackArena3.Services;
-
-/// <summary>
-/// Odpowiedzialny za pozyskiwanie i odświeżanie tokenów gry (GameToken) z API.
-/// Implementuje IAsyncDisposable do poprawnego zarządzania kanałem gRPC.
-/// </summary>
 internal sealed class GameTokenProvider : IAsyncDisposable
 {
     private const int RpcTimeoutSeconds = 10;
@@ -18,6 +13,7 @@ internal sealed class GameTokenProvider : IAsyncDisposable
     private readonly GameTokenIssuerService.GameTokenIssuerServiceClient _client;
     private bool _requestInfoLogged = false;
 
+    public string MemberJwt { get; }
     public GameToken? CurrentToken { get; private set; }
 
     public GameTokenProvider(string apiAddr, string memberJwt)
@@ -28,15 +24,12 @@ internal sealed class GameTokenProvider : IAsyncDisposable
         }
         _memberJwt = memberJwt;
 
-        _channel = GrpcChannelFactory.CreateGameTokenChannel(apiAddr);
+        this.MemberJwt = memberJwt;
 
+        _channel = GrpcChannelFactory.CreateGameTokenChannel(apiAddr);
         _client = new GameTokenIssuerService.GameTokenIssuerServiceClient(_channel);
     }
 
-    /// <summary>
-    /// Wymusza odświeżenie tokenu gry, wysyłając żądanie do API.
-    /// </summary>
-    /// <returns>Nowo pozyskany token gry.</returns>
     public async Task<GameToken> RefreshAsync(CancellationToken cancellationToken = default)
     {
         CurrentToken = await RequestNewGameTokenAsync(cancellationToken);
@@ -58,7 +51,6 @@ internal sealed class GameTokenProvider : IAsyncDisposable
 
         if (!_requestInfoLogged)
         {
-            // Logujemy teraz adres bazowy, a nie cel kanału, co jest bardziej intuicyjne
             Console.Error.WriteLine($"[ha3-wrapper] Requesting game token via gRPC: base_address={_channel.Target}, path_prefix=/gametoken");
             _requestInfoLogged = true;
         }
@@ -101,11 +93,6 @@ internal sealed class GameTokenProvider : IAsyncDisposable
         }
     }
 
-    /// <summary>
-    /// Zapewnia, że token jest świeży. Jeśli zbliża się jego wygaśnięcie, odświeża go.
-    /// </summary>
-    /// <param name="refreshSkewSeconds">Liczba sekund przed wygaśnięciem, kiedy należy odświeżyć token.</param>
-    /// <returns>True, jeśli token został odświeżony, w przeciwnym razie false.</returns>
     public async Task<bool> EnsureFreshAsync(int refreshSkewSeconds = 30)
     {
         if (CurrentToken == null)
@@ -125,9 +112,6 @@ internal sealed class GameTokenProvider : IAsyncDisposable
         return false;
     }
 
-    /// <summary>
-    /// Bezpiecznie zamyka kanał gRPC.
-    /// </summary>
     public async ValueTask DisposeAsync()
     {
         await _channel.ShutdownAsync();

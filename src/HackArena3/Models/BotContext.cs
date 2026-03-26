@@ -17,11 +17,6 @@ public class BotContext {
         _actions = new();
     }
 
-    /// <summary>
-    /// Podpina prawdziwe, działające akcje,
-    /// które komunikują się z pętlą gry.
-    /// </summary>
-    /// <param name="actions">Obiekt z delegatami do działających funkcji.</param>
     internal void BindActions(BotContextActions actions)
     {
         _actions = actions;

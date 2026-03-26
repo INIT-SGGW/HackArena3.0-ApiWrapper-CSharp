@@ -8,21 +8,13 @@ internal static class AuthBinaryResolver
     private const string BinaryName = "ha-auth";
     private const string BinaryNameWindows = "ha-auth.exe";
 
-    /// <summary>
-    /// Wyszukuje plik binarny 'ha-auth' w predefiniowanych lokalizacjach oraz w PATH.
-    /// </summary>
-    /// <param name="haAuthBinOverride">Bezpośrednia ścieżka z konfiguracji, ma najwyższy priorytet.</param>
-    /// <returns>Pełna, znormalizowana ścieżka do pliku binarnego.</returns>
-    /// <exception cref="AuthException">Rzucany, gdy plik binarny nie zostanie znaleziony.</exception>
-    public static string ResolveHaAuthBinary(string? haAuthBinOverride)
+    internal static string ResolveHaAuthBinary(string? haAuthBinOverride)
     {
         var candidates = new List<string?>();
 
-        // Krok 1: Dodaj kandydatów w odpowiedniej kolejności priorytetów
         candidates.Add(haAuthBinOverride);
         candidates.Add(Environment.GetEnvironmentVariable(EnvHaAuthBin));
 
-        // Krok 2: Dodaj kandydatów specyficznych dla systemu operacyjnego
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             var localAppData = Environment.GetEnvironmentVariable("LOCALAPPDATA");
@@ -31,7 +23,7 @@ internal static class AuthBinaryResolver
                 candidates.Add(Path.Combine(localAppData, "HackArena", "bin", BinaryNameWindows));
             }
         }
-        else // Zakładamy systemy typu Unix (Linux, macOS)
+        else
         {
             var xdgDataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
             if (!string.IsNullOrEmpty(xdgDataHome))
@@ -43,10 +35,8 @@ internal static class AuthBinaryResolver
             candidates.Add(Path.Combine(home, ".local", "share", "hackarena", "bin", BinaryName));
         }
 
-        // Krok 3: Dodaj nazwę binarki, aby przeszukać PATH
         candidates.Add(BinaryName);
 
-        // Krok 4: Przetwórz kandydatów i zwróć pierwszego pasującego
         foreach (var candidate in candidates)
         {
             if (string.IsNullOrWhiteSpace(candidate))
@@ -61,32 +51,24 @@ internal static class AuthBinaryResolver
             }
         }
 
-        // Krok 5: Jeśli nic nie znaleziono, rzuć wyjątek
         throw new AuthException(
             $"Cannot find `{BinaryName}` binary. Run `hackarena install auth` or set {EnvHaAuthBin}."
         );
     }
 
-    /// <summary>
-    /// Sprawdza, czy kandydat jest prawidłową ścieżką do pliku lub czy można go znaleźć w PATH.
-    /// Odpowiednik _resolve_from_candidate z Pythona.
-    /// </summary>
     private static string? ResolveFromCandidate(string candidate)
     {
-        // Jeśli kandydat jest pełną ścieżką
         if (Path.IsPathRooted(candidate) && File.Exists(candidate))
         {
             return Path.GetFullPath(candidate);
         }
 
-        // Jeśli kandydat jest ścieżką względną
         var combinedPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), candidate));
         if (File.Exists(combinedPath))
         {
             return combinedPath;
         }
 
-        // Wyszukaj w zmiennej środowiskowej PATH (odpowiednik shutil.which)
         var pathVariable = Environment.GetEnvironmentVariable("PATH");
         if (pathVariable != null)
         {

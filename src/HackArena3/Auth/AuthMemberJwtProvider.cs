@@ -19,12 +19,7 @@ internal class MemberJwtProvider
         return $"Run `hackarena auth login` or `{binaryName} login`.";
     }
 
-    /// <summary>
-    /// Uruchamia proces ha-auth w celu pobrania tokenu JWT członka zespołu.
-    /// </summary>
-    /// <returns>Pobrany token JWT.</returns>
-    /// <exception cref="AuthException">Rzucany w przypadku błędów wykonania lub parsowania.</exception>
-    public async Task<string> FetchMemberJwtAsync()
+    public async Task<string> FetchMemberJwtAsync(CancellationToken cancellationToken = default)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -47,9 +42,8 @@ internal class MemberJwtProvider
             throw new AuthException($"Failed to run `{_haAuthBinaryPath}`: {ex.Message}", ex);
         }
 
-        // Asynchronicznie odczytaj strumienie wyjścia i błędu
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrTask = process.StandardError.ReadToEndAsync();
+        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
         await process.WaitForExitAsync();
 

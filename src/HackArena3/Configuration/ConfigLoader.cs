@@ -6,17 +6,13 @@ namespace Hackarena3.Wrapper.Configuration;
 
 internal static class ConfigLoader
 {
-    // Definicje kluczy zmiennych środowiskowych, aby uniknąć "magicznych stringów".
     private const string EnvApiUrl = "HA3_WRAPPER_API_URL";
     private const string EnvHaAuthBin = "HA3_WRAPPER_HA_AUTH_BIN";
+    private const string EnvBackendEndpoint = "HA3_WRAPPER_BACKEND_ENDPOINT";
+    private const string EnvTeamToken = "HA3_WRAPPER_TEAM_TOKEN";
+    private const string EnvAuthToken = "HA3_WRAPPER_AUTH_TOKEN";
 
-    /// <summary>
-    /// Ładuje konfigurację ze zmiennych środowiskowych oraz pliku .env.
-    /// Nie uwzględnia argumentów linii poleceń.
-    /// </summary>
-    /// <returns>Obiekt RuntimeConfig z wczytanymi wartościami.</returns>
-    /// <exception cref="ConfigException">Rzucany, gdy brakuje wymaganych zmiennych.</exception>
-    public static RuntimeConfig LoadConfigurationFromEnvironment()
+    public static RuntimeConfig LoadConfigurationFromEnvironment(bool requireApiAddr = true)
     {
         DotEnv.Load(options: new DotEnvOptions(
             ignoreExceptions: true,
@@ -28,7 +24,7 @@ internal static class ConfigLoader
             .Build();
 
         var apiUrl = configuration[EnvApiUrl];
-        if (string.IsNullOrWhiteSpace(apiUrl))
+        if (requireApiAddr && string.IsNullOrWhiteSpace(apiUrl))
         {
             throw new ConfigException($"Missing required runtime env: {EnvApiUrl}");
         }
@@ -42,9 +38,42 @@ internal static class ConfigLoader
             SandboxId = null
         };
     }
+
+    public static OfficialRuntimeConfig LoadOfficialConfiguration()
+    {
+        DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: true, envFilePaths: new[] { "user/.env" }));
+        var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+
+        var endpoint = configuration[EnvBackendEndpoint];
+        if (string.IsNullOrWhiteSpace(endpoint))
+            throw new ConfigException($"Missing required runtime env: {EnvBackendEndpoint}");
+
+        var teamToken = configuration[EnvTeamToken];
+        if (string.IsNullOrWhiteSpace(teamToken))
+            throw new ConfigException($"Missing required runtime env: {EnvTeamToken}");
+
+        var authToken = configuration[EnvAuthToken];
+        if (string.IsNullOrWhiteSpace(authToken))
+            throw new ConfigException($"Missing required runtime env: {EnvAuthToken}");
+
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri) || uri.Scheme != "https")
+            throw new ConfigException($"Invalid {EnvBackendEndpoint}: expected https:// URL.");
+
+        if (string.IsNullOrEmpty(uri.Host))
+            throw new ConfigException($"Invalid {EnvBackendEndpoint}: missing host in URL '{endpoint}'.");
+
+        var rpcPrefix = uri.AbsolutePath.TrimEnd('/');
+        if (string.IsNullOrEmpty(rpcPrefix) || rpcPrefix == "/")
+            throw new ConfigException($"Invalid {EnvBackendEndpoint}: non-root path prefix is required.");
+
+        return new OfficialRuntimeConfig
+        {
+            GrpcTarget = uri.Host + ":" + uri.Port,
+            RpcPrefix = rpcPrefix,
+            TeamToken = teamToken,
+            AuthToken = authToken
+        };
+    }
 }
 
-/// <summary>
-/// Wyjątek rzucany w przypadku błędów konfiguracji.
-/// </summary>
-public class ConfigException(string message) : Exception(message);
+internal class ConfigException(string message) : Exception(message);
