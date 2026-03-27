@@ -43,7 +43,7 @@ internal class RuntimeOrchestrator
         }
     }
 
-    public async Task RunOfficialModeAsync(OfficialRuntimeConfig config, CancellationToken cancellationToken)
+    public async Task RunOfficialModeAsync(OfficialRuntimeConfig config, CancellationToken cancellationToken = default)
     {
         var channel = GrpcChannelFactory.CreateOfficialChannel(config.GrpcTarget, config.RpcPrefix);
 
@@ -56,13 +56,13 @@ internal class RuntimeOrchestrator
             { "cookie", $"auth_token={config.AuthToken}" }
         };
 
-        Console.WriteLine("[ha3-wrapper] Preparing official join...");
+        Console.Error.WriteLine("[ha3-wrapper] Preparing official join...");
         var prepareResponse = await raceClient.PrepareOfficialJoinAsync(
             new ProtoRace.PrepareOfficialJoinRequest(),
             metadata,
             cancellationToken: cancellationToken);
 
-        Console.WriteLine("[ha3-wrapper] Fetching official track data...");
+        Console.Error.WriteLine("[ha3-wrapper] Fetching official track data...");
         var trackData = await trackClient.GetTrackDataAsync(
             new ProtoRace.GetTrackDataRequest { MapId = prepareResponse.MapId },
             metadata,

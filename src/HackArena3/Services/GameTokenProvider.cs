@@ -65,6 +65,7 @@ internal sealed class GameTokenProvider : IAsyncDisposable
             );
 
             var tokenPayload = response.Token;
+
             if (string.IsNullOrWhiteSpace(tokenPayload?.Jwt))
             {
                 throw new GameTokenException("Game token gRPC response has empty `token.jwt`.");

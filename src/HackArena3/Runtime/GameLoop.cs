@@ -40,6 +40,8 @@ internal class GameLoop
             CreateSandboxMetadata(),
             cancellationToken: cancellationToken);
 
+        Console.Error.WriteLine($"[ha3-wrapper] Joined sandbox. Car ID: {joinResponse.CarId}, Map ID: {joinResponse.MapId}");
+
         var trackData = await trackClient.GetTrackDataAsync(
             new ProtoRace.GetTrackDataRequest { MapId = joinResponse.MapId },
             CreateSandboxMetadata(),
@@ -47,7 +49,7 @@ internal class GameLoop
 
         await RunParticipantLoopAsync(
             channel,
-            (int)joinResponse.CarId,
+            joinResponse.CarId,
             ProtoConverter.ToTrackLayout(trackData.Track),
             CreateSandboxMetadata,
             allowTokenRefresh: true,
@@ -62,7 +64,7 @@ internal class GameLoop
     {
         await RunParticipantLoopAsync(
             _providedChannel!,
-            (int)prepareResponse.CarId,
+            prepareResponse.CarId,
             ProtoConverter.ToTrackLayout(trackData),
             () => staticMetadata,
             allowTokenRefresh: false,
@@ -70,7 +72,7 @@ internal class GameLoop
     }
     private async Task RunParticipantLoopAsync(
         GrpcChannel channel,
-        int carId,
+        ulong carId,
         TrackLayout trackLayout,
         Func<Metadata> metadataProvider,
         bool allowTokenRefresh,
@@ -81,7 +83,7 @@ internal class GameLoop
         var outboundChannel = Channel.CreateUnbounded<ProtoRace.ParticipantClientMessage>();
 
         var context = new BotContext { 
-            CarId = carId, 
+            CarId = (int)carId, 
             MapId = trackLayout.MapId, 
             Track = trackLayout, 
             EffectiveHz = 30, 
@@ -149,19 +151,26 @@ internal class GameLoop
             }
         }, cancellationToken);
 
+        var runningTasks = new List<Task> { readerTask, writerTask };
+
         var tokenRefreshTask = Task.Run(async () =>
         {
-            if (!allowTokenRefresh) return;
+            if (!allowTokenRefresh || _tokenProvider == null) return;
 
             while (!cancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken);
-                if (await _tokenProvider!.EnsureFreshAsync())
+                if (await _tokenProvider.EnsureFreshAsync())
                 {
                     Console.Error.WriteLine("[ha3-wrapper] Game token rotated. Restarting stream is required.");
                 }
             }
         }, cancellationToken);
+
+        if (allowTokenRefresh)
+        {
+            runningTasks.Add(tokenRefreshTask);
+        }
 
         await Task.WhenAny(readerTask, writerTask, tokenRefreshTask);
 

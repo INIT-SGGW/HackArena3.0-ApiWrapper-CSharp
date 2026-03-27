@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
 	<PackageId>HackArena3.Wrapper.CSharp</PackageId>
-	<Version>0.1.0-beta.3</Version>
+	<Version>0.1.0-beta.4</Version>
 	<Authors>KN init</Authors>
 	<Company>INIT Students Association</Company>
     <ImplicitUsings>enable</ImplicitUsings>

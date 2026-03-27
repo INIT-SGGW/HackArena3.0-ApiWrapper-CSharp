@@ -40,7 +40,7 @@ public static class Client
         }
         catch (OperationCanceledException)
         {
-            Console.WriteLine("\n[ha3-wrapper] Bot execution cancelled by user.");
+            Console.Error.WriteLine("\n[ha3-wrapper] Bot execution cancelled by user.");
             return 130;
         }
         catch (GameTokenException ex)

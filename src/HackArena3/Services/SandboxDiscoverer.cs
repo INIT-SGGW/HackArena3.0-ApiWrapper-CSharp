@@ -193,11 +193,11 @@ internal class SandboxDiscoverer
             return selected;
         }
 
-        Console.WriteLine("[ha3-wrapper] Active team sandboxes (broker):");
+        Console.Error.WriteLine("[ha3-wrapper] Active team sandboxes (broker):");
         for (int i = 0; i < discovered.Count; i++)
         {
             var entry = discovered[i];
-            Console.WriteLine(
+            Console.Error.WriteLine(
                 $"[ha3-wrapper] {i + 1}. {entry.SandboxName} | id={entry.SandboxId} " +
                 $"| user={entry.Backend.UserDisplay} | map={entry.MapId} | players={entry.ActivePlayerCount} " +
                 $"| endpoint={entry.Backend.Host}:{entry.Backend.Port}");
@@ -212,7 +212,7 @@ internal class SandboxDiscoverer
 
         while (true)
         {
-            Console.Write($"Select sandbox [1-{discovered.Count}] (default 1): ");
+            Console.Error.Write($"[ha3-wrapper] Select sandbox [1-{discovered.Count}] (default 1): ");
             var rawInput = Console.ReadLine()?.Trim();
             if (string.IsNullOrEmpty(rawInput))
             {
@@ -222,7 +222,7 @@ internal class SandboxDiscoverer
             {
                 return discovered[index - 1];
             }
-            Console.WriteLine("[ha3-wrapper] Invalid selection. Try again.");
+            Console.Error.WriteLine("[ha3-wrapper] Invalid selection. Try again.");
         }
     }
 
