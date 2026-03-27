@@ -172,7 +172,7 @@ internal class GameLoop
             runningTasks.Add(tokenRefreshTask);
         }
 
-        await Task.WhenAny(readerTask, writerTask, tokenRefreshTask);
+        await Task.WhenAny(runningTasks);
 
         await call.RequestStream.CompleteAsync();
         outboundChannel.Writer.Complete();
