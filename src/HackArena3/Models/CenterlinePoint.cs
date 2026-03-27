@@ -3,7 +3,7 @@
 namespace src.HackArena3.Models;
 
 public record CenterlinePoint(
-    float DistanceFromStartM,
+    float SM,
     Vec3 Position,
     Vec3 Tangent,
     Vec3 Normal,

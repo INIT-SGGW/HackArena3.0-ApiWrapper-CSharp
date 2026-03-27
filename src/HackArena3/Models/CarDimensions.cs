@@ -1,6 +1,6 @@
 ﻿namespace src.HackArena3.Models;
 
-public record CarDimension(
+public record CarDimensions(
     float WidthM,
     float DepthM
 );

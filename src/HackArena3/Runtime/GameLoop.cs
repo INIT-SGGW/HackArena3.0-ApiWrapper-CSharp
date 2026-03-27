@@ -89,7 +89,7 @@ internal class GameLoop
             EffectiveHz = 30, 
             RequestedHz = 30, 
             Tick = 0, 
-            CarDimension = new CarDimension(123,123) 
+            CarDimensions = new CarDimensions(123,123) 
         };
 
         var realActions = new BotContextActions(

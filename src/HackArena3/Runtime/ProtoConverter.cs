@@ -29,7 +29,9 @@ internal static class ProtoConverter
             PitRequestActive: proto.Self.Telemetry.PitRuntime.PitRequestActive,
             PitEmergencyLockRemainingMs: (int)proto.Self.Telemetry.PitRuntime.EmergencyLockRemainingMs,
             LastPitTimeMs: (int)proto.Self.Telemetry.PitRuntime.LastPitTimeMs,
-            LastPitSource: (int)proto.Self.Telemetry.PitRuntime.LastPitSource
+            LastPitSource: (PitEntrySource)proto.Self.Telemetry.PitRuntime.LastPitSource,
+            LastPitLap: (int)proto.Self.Telemetry.PitRuntime.LastPitLap,
+            CommandCooldowns: ToCommandCooldownState(proto.Self.Telemetry.CommandCooldowns)
         );
 
         List<OpponentState> opponents = [];
@@ -84,15 +86,15 @@ internal static class ProtoConverter
 
     public static GhostModeState ToGhostModeState(ProtoRace.GhostModeState proto)
     {
-        List<int> blockers = [];
+        List<GhostModeBlocker> blockers = [];
         foreach(var blocker in proto.Blockers)
         {
-            blockers.Add((int)blocker);
+            blockers.Add((GhostModeBlocker)blocker);
         }
 
         return new GhostModeState(
             CanCollideNow: proto.CanCollideNow,
-            Phase: (int)proto.Phase,
+            Phase: (GhostModePhase)proto.Phase,
             Blockers: [.. blockers],
             ExitDelayRemainingMs: (int)proto.ExitDelayRemainingMs
         );
@@ -158,7 +160,7 @@ internal static class ProtoConverter
         }
 
         return new CenterlinePoint(
-            DistanceFromStartM: (float)proto.SM,
+            SM: (float)proto.SM,
             Position: ToVec3(proto.Position),
             Tangent: ToVec3(proto.Tangent),
             Normal: ToVec3(proto.Normal),
@@ -208,6 +210,14 @@ internal static class ProtoConverter
             Fix: [.. fix],
             Exit: [.. exit],
             LengthM: proto.LengthM
+        );
+    }
+
+    public static CommandCooldownState ToCommandCooldownState(ProtoRace.CommandCooldownState proto)
+    {
+        return new CommandCooldownState(
+            BackToTrackRemainingMs: (int)proto.BackToTrackRemainingMs,
+            EmergencyPitstopRemainingMs: (int)proto.EmergencyPitstopRemainingMs
         );
     }
 }

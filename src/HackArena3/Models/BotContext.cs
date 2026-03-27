@@ -5,7 +5,7 @@ namespace src.HackArena3.Models;
 public class BotContext {
     public required int CarId { get; init; }
     public required string MapId { get; init; }
-    public required CarDimension CarDimension { get; init; }
+    public required CarDimensions CarDimensions { get; init; }
     public required int RequestedHz { get; init; }
     public required TrackLayout Track { get; init; }
     public required int? EffectiveHz { get; init; }
