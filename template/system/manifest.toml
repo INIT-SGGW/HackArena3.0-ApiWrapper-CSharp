@@ -1,1 +1,26 @@
-﻿
+﻿schema = 1
+
+[wrapper]
+language = "csharp"
+template_version = "0.0.0"
+
+[runtime]
+engine = "dotnet"
+version = "8.0"
+
+[run]
+entrypoint = ["dotnet", "run", "--project", "Bot.csproj"]
+source_dir = "user"
+
+[submit]
+include = [
+    "user/src",
+    "user/Bot.csproj"
+]
+exclude = [
+	"**/.vs/**",
+	"**/bin/**",
+	"**/obj/**",
+	"**/Properties/**",
+	"**/Bot.sln"
+]
